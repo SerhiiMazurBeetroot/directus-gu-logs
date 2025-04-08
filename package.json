@@ -1,0 +1,26 @@
+{
+	"name": "@serhii.mazur/directus-gu-logs",
+	"version": "1.0.0",
+	"description": "Helper class Logs for using in Directus extensions",
+	"type": "module",
+	"main": "./dist/index.js",
+	"scripts": {
+		"build": "tsc",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "Serhii Mazur",
+	"license": "ISC",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/SerhiiMazurBeetroot/directus-gu-logs"
+	},
+	"devDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"@directus/extensions": "^3.0.4",
+		"@directus/types": "^13.1.0",
+		"pino": "^9.6.0",
+		"vue-router": "^4.5.0"
+	}
+}
