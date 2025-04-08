@@ -12,7 +12,7 @@
 	"license": "ISC",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/SerhiiMazurBeetroot/directus-gu-logs"
+		"url": "git+https://github.com/SerhiiMazurBeetroot/directus-gu-logs.git"
 	},
 	"devDependencies": {
 		"typescript": "^5.0.0"
@@ -22,5 +22,13 @@
 		"@directus/types": "^13.1.0",
 		"pino": "^9.6.0",
 		"vue-router": "^4.5.0"
-	}
+	},
+	"directories": {
+		"doc": "docs"
+	},
+	"types": "./dist/index.d.ts",
+	"bugs": {
+		"url": "https://github.com/SerhiiMazurBeetroot/directus-gu-logs/issues"
+	},
+	"homepage": "https://github.com/SerhiiMazurBeetroot/directus-gu-logs#readme"
 }
