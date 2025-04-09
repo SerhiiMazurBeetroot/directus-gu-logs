@@ -37,7 +37,7 @@ This recipient will be used to send internal notifications when errors occur.
 ## 📦 Installation
 
 ```bash
-npm install @serhii.mazur/directus-gu-logs
+npm i @serhii.mazur/directus-gu-logs
 ```
 
 ## 🧩 Usage
@@ -45,9 +45,9 @@ npm install @serhii.mazur/directus-gu-logs
 ```ts
 import { Logs } from "@serhii.mazur/directus-gu-logs";
 
-const logs = new Logs(context, "logs", "my-extension");
+const logs = new Logs(context, "my-extension", "logs");
 
 await logs.printLogs("myFunction", "message");
-await logs.createActivity("create", "collection", "id", "comment");
+await logs.createActivity("create", "collection", "id");
 await logs.createNotification("An error occurred");
 ```

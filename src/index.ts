@@ -11,13 +11,13 @@ interface LogEntry {
 
 export class Logs {
 	protected context: ApiExtensionContext;
-	protected collectionName: string;
 	protected extension: string;
+	protected collectionName: string;
 
-	constructor(context: ApiExtensionContext, collectionName = "logs", extension = "unknown") {
+	constructor(context: ApiExtensionContext, extension = "unknown", collectionName = "logs") {
 		this.context = context;
-		this.collectionName = collectionName;
 		this.extension = extension;
+		this.collectionName = collectionName;
 	}
 
 	private async getSchema() {

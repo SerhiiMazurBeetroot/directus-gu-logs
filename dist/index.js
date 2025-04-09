@@ -1,8 +1,8 @@
 export class Logs {
-    constructor(context, collectionName = "logs", extension = "unknown") {
+    constructor(context, extension = "unknown", collectionName = "logs") {
         this.context = context;
-        this.collectionName = collectionName;
         this.extension = extension;
+        this.collectionName = collectionName;
     }
     async getSchema() {
         return await this.context.getSchema();
