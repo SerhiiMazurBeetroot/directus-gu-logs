@@ -31,7 +31,7 @@ export class Logs {
             console.error("❌ Failed to save logs:", error);
         }
     }
-    async createActivity(action = "create", collection, id, comment = "") {
+    async createActivity(action, collection, id) {
         try {
             const schema = await this.getSchema();
             const services = this.context.services;
@@ -43,7 +43,6 @@ export class Logs {
             });
             await activityService.createOne({
                 action,
-                comment,
                 user: accountability?.user ?? null,
                 collection,
                 ip: accountability?.ip ?? null,

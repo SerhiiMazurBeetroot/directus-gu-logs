@@ -52,12 +52,7 @@ export class Logs {
 		}
 	}
 
-	async createActivity(
-		action: "create" | "update" | "delete" = "create",
-		collection: string,
-		id: PrimaryKey,
-		comment: string = ""
-	) {
+	async createActivity(action: string, collection: string, id: PrimaryKey) {
 		try {
 			const schema = await this.getSchema();
 			const services = this.context.services;
@@ -71,7 +66,6 @@ export class Logs {
 
 			await activityService.createOne({
 				action,
-				comment,
 				user: accountability?.user ?? null,
 				collection,
 				ip: accountability?.ip ?? null,

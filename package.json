@@ -1,6 +1,6 @@
 {
 	"name": "@serhii.mazur/directus-gu-logs",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"description": "Helper class Logs for using in Directus extensions",
 	"type": "module",
 	"main": "./dist/index.js",

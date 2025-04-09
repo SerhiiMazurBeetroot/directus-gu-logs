@@ -8,6 +8,6 @@ export declare class Logs {
     private getSchema;
     private createOne;
     printLogs(functionName: string, error: string): Promise<void>;
-    createActivity(action: "create" | "update" | "delete" | undefined, collection: string, id: PrimaryKey, comment?: string): Promise<void>;
+    createActivity(action: string, collection: string, id: PrimaryKey): Promise<void>;
     createNotification(message?: string): Promise<void>;
 }
