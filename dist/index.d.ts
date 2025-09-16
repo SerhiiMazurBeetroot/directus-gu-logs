@@ -9,5 +9,5 @@ export declare class Logs {
     private createOne;
     printLogs(functionName: string, error: string): Promise<void>;
     createActivity(action: string, collection: string, id: PrimaryKey): Promise<void>;
-    createNotification(message: string, customSubject?: null, recipientOverride?: null): Promise<void>;
+    createNotification(message: string, customSubject?: string | null, recipientOverride?: string | null): Promise<void>;
 }

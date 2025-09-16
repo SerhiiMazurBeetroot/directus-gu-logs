@@ -78,7 +78,11 @@ export class Logs {
 		}
 	}
 
-	async createNotification(message: string, customSubject = null, recipientOverride = null) {
+	async createNotification(
+		message: string,
+		customSubject: string | null = null,
+		recipientOverride: string | null = null
+	) {
 		try {
 			const schema = await this.getSchema();
 			const { database, services } = this.context;
@@ -102,7 +106,16 @@ export class Logs {
 			const projectName = settings?.project_name || "Unknown Project";
 			const backendUrl = process.env.BACKEND_URL || this.context.env?.PUBLIC_URL || "Unknown URL";
 			const environment = process.env.BRANCH || "dev";
-			const timestamp = new Date().toLocaleString("en-GB", { timeZone: "UTC" });
+			const now = new Date();
+			const timestamp = new Intl.DateTimeFormat("en-US", {
+				month: "2-digit",
+				day: "2-digit",
+				year: "numeric",
+				hour: "2-digit",
+				minute: "2-digit",
+				hour12: false,
+				timeZone: "UTC",
+			}).format(now);
 
 			// Compose subject & message
 			const subject = customSubject
@@ -110,12 +123,11 @@ export class Logs {
 				: `Directus Error Notification - ${projectName}`;
 
 			const fullMessage = `
-${message}
-
-Environment: ${environment}
-Backend URL: ${backendUrl}
-Date/Time (UTC): ${timestamp}
-		`.trim();
+${message}<br><br>
+<strong>Environment:</strong> ${environment}<br>
+<strong>Backend URL:</strong> <a href="${backendUrl}" target="_blank">${backendUrl}</a><br>
+<strong>Date/Time (UTC):</strong> ${timestamp}
+`.trim();
 
 			await notificationService.createOne({
 				recipient,
