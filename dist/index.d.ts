@@ -4,10 +4,10 @@ export declare class Logs {
     protected context: ApiExtensionContext;
     protected extension: string;
     protected collectionName: string;
-    constructor(context: ApiExtensionContext, extension?: string, collectionName?: string);
+    constructor(context: ApiExtensionContext, extension: string, collectionName?: string);
     private getSchema;
     private createOne;
     printLogs(functionName: string, error: string): Promise<void>;
     createActivity(action: string, collection: string, id: PrimaryKey): Promise<void>;
-    createNotification(message?: string): Promise<void>;
+    createNotification(message: string, customSubject?: null, recipientOverride?: null): Promise<void>;
 }

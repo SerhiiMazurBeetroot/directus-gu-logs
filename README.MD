@@ -50,4 +50,5 @@ const logs = new Logs(context, "my-extension", "logs");
 await logs.printLogs("myFunction", "message");
 await logs.createActivity("create", "collection", "id");
 await logs.createNotification("An error occurred");
+await logs.createNotification("An error occurred", "Custom subject", "recipient_id");
 ```

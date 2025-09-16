@@ -14,7 +14,7 @@ export class Logs {
 	protected extension: string;
 	protected collectionName: string;
 
-	constructor(context: ApiExtensionContext, extension = "unknown", collectionName = "logs") {
+	constructor(context: ApiExtensionContext, extension: string, collectionName: string = "logs") {
 		this.context = context;
 		this.extension = extension;
 		this.collectionName = collectionName;
@@ -78,26 +78,50 @@ export class Logs {
 		}
 	}
 
-	async createNotification(message = "") {
+	async createNotification(message: string, customSubject = null, recipientOverride = null) {
 		try {
 			const schema = await this.getSchema();
 			const { database, services } = this.context;
 
-			const globalSettings = await database.select("notice_recipient").from("global").first();
-			const recipient = globalSettings?.notice_recipient;
+			// Check for passed recipient, fallback to global settings
+			let recipient = recipientOverride;
+			if (!recipient) {
+				const globalSettings = await database.select("notice_recipient").from("global").first();
+				recipient = globalSettings?.notice_recipient;
+			}
 
 			if (!recipient) {
-				this.printLogs(this.extension, "No recipient defined in global settings");
+				this.printLogs(this.extension, "No recipient defined (override or global settings)");
 				return;
 			}
 
 			const notificationService = new services.NotificationsService({ schema });
 
+			// Project Data
+			const settings = await database.select("project_name").from("directus_settings").first();
+			const projectName = settings?.project_name || "Unknown Project";
+			const backendUrl = process.env.BACKEND_URL || this.context.env?.PUBLIC_URL || "Unknown URL";
+			const environment = process.env.BRANCH || "dev";
+			const timestamp = new Date().toLocaleString("en-GB", { timeZone: "UTC" });
+
+			// Compose subject & message
+			const subject = customSubject
+				? `${customSubject} - ${projectName}`
+				: `Directus Error Notification - ${projectName}`;
+
+			const fullMessage = `
+${message}
+
+Environment: ${environment}
+Backend URL: ${backendUrl}
+Date/Time (UTC): ${timestamp}
+		`.trim();
+
 			await notificationService.createOne({
 				recipient,
 				sender: recipient,
-				subject: "Directus Error Notification",
-				message,
+				subject,
+				message: fullMessage,
 				collection: null,
 				item: null,
 			});
