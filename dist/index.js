@@ -55,7 +55,7 @@ export class Logs {
             console.error("❌ Failed to create activity log:", error);
         }
     }
-    async createNotification(message, customSubject = null, recipientOverride = null) {
+    async createNotification(message, customSubject = null, recipientOverride = null, collection = null, item = null) {
         try {
             const schema = await this.getSchema();
             const { database, services } = this.context;
@@ -100,8 +100,8 @@ ${message}<br><br>
                 sender: recipient,
                 subject,
                 message: fullMessage,
-                collection: null,
-                item: null,
+                collection,
+                item,
             });
         }
         catch (error) {

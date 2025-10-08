@@ -81,7 +81,9 @@ export class Logs {
 	async createNotification(
 		message: string,
 		customSubject: string | null = null,
-		recipientOverride: string | null = null
+		recipientOverride: string | null = null,
+		collection: string | null = null,
+		item: string | null = null
 	) {
 		try {
 			const schema = await this.getSchema();
@@ -134,8 +136,8 @@ ${message}<br><br>
 				sender: recipient,
 				subject,
 				message: fullMessage,
-				collection: null,
-				item: null,
+				collection,
+				item,
 			});
 		} catch (error) {
 			console.error("❌ Failed to create notification:", error);
