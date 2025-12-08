@@ -60,13 +60,19 @@ export class Logs {
             const schema = await this.getSchema();
             const { database, services } = this.context;
             // Check for passed recipient, fallback to global settings
-            let recipient = recipientOverride;
-            if (!recipient) {
-                const globalSettings = await database.select("notice_recipient").from("global").first();
-                recipient = globalSettings?.notice_recipient;
+            let recipients = [];
+            if (recipientOverride) {
+                recipients = [recipientOverride];
             }
-            if (!recipient) {
-                this.printLogs(this.extension, "No recipient defined (override or global settings)");
+            else {
+                const globalSettings = await database
+                    .select("notice_recipient", "developer_notice_recipient")
+                    .from("global")
+                    .first();
+                recipients = [globalSettings?.notice_recipient, globalSettings?.developer_notice_recipient].filter(Boolean);
+            }
+            if (recipients.length === 0) {
+                this.printLogs(this.extension, "No recipients defined (override or global settings)");
                 return;
             }
             const notificationService = new services.NotificationsService({ schema });
@@ -95,14 +101,16 @@ ${message}<br><br>
 <strong>Backend URL:</strong> <a href="${backendUrl}" target="_blank">${backendUrl}</a><br>
 <strong>Date/Time (UTC):</strong> ${timestamp}
 `.trim();
-            await notificationService.createOne({
-                recipient,
-                sender: recipient,
-                subject,
-                message: fullMessage,
-                collection,
-                item,
-            });
+            for (const recipient of recipients) {
+                await notificationService.createOne({
+                    recipient,
+                    sender: recipient,
+                    subject,
+                    message: fullMessage,
+                    collection,
+                    item,
+                });
+            }
         }
         catch (error) {
             console.error("❌ Failed to create notification:", error);

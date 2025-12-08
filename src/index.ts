@@ -90,14 +90,23 @@ export class Logs {
 			const { database, services } = this.context;
 
 			// Check for passed recipient, fallback to global settings
-			let recipient = recipientOverride;
-			if (!recipient) {
-				const globalSettings = await database.select("notice_recipient").from("global").first();
-				recipient = globalSettings?.notice_recipient;
+			let recipients: string[] = [];
+
+			if (recipientOverride) {
+				recipients = [recipientOverride];
+			} else {
+				const globalSettings = await database
+					.select("notice_recipient", "developer_notice_recipient")
+					.from("global")
+					.first();
+
+				recipients = [globalSettings?.notice_recipient, globalSettings?.developer_notice_recipient].filter(
+					Boolean
+				);
 			}
 
-			if (!recipient) {
-				this.printLogs(this.extension, "No recipient defined (override or global settings)");
+			if (recipients.length === 0) {
+				this.printLogs(this.extension, "No recipients defined (override or global settings)");
 				return;
 			}
 
@@ -105,9 +114,11 @@ export class Logs {
 
 			// Project Data
 			const settings = await database.select("project_name").from("directus_settings").first();
+
 			const projectName = settings?.project_name || "Unknown Project";
 			const backendUrl = process.env.BACKEND_URL || this.context.env?.PUBLIC_URL || "Unknown URL";
 			const environment = process.env.BRANCH || "dev";
+
 			const now = new Date();
 			const timestamp = new Intl.DateTimeFormat("en-US", {
 				month: "2-digit",
@@ -131,14 +142,16 @@ ${message}<br><br>
 <strong>Date/Time (UTC):</strong> ${timestamp}
 `.trim();
 
-			await notificationService.createOne({
-				recipient,
-				sender: recipient,
-				subject,
-				message: fullMessage,
-				collection,
-				item,
-			});
+			for (const recipient of recipients) {
+				await notificationService.createOne({
+					recipient,
+					sender: recipient,
+					subject,
+					message: fullMessage,
+					collection,
+					item,
+				});
+			}
 		} catch (error) {
 			console.error("❌ Failed to create notification:", error);
 		}

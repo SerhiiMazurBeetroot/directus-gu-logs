@@ -20,9 +20,10 @@ You need to create a collection named `logs` with the following fields:
 
 Add the following field to the `global` collection:
 
-| Field Name         | Type                 | Description                       |
-| ------------------ | -------------------- | --------------------------------- |
-| `notice_recipient` | m2o → directus_users | Recipient for error notifications |
+| Field Name                   | Type                 | Description                       |
+| ---------------------------- | -------------------- | --------------------------------- |
+| `notice_recipient`           | m2o → directus_users | Recipient for error notifications |
+| `developer_notice_recipient` | m2o → directus_users | Recipient for error notifications |
 
 This recipient will be used to send internal notifications when errors occur.
 
