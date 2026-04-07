@@ -1,3 +1,14 @@
+function extractRecipientIds(rows) {
+    const recipients = rows
+        ?.map(row => {
+        const user = row?.directus_users_id;
+        if (typeof user === "string")
+            return user;
+        return typeof user?.id === "string" ? user.id : null;
+    })
+        .filter((value) => Boolean(value)) ?? [];
+    return Array.from(new Set(recipients));
+}
 export class Logs {
     constructor(context, extension, collectionName = "logs") {
         this.context = context;
@@ -59,17 +70,26 @@ export class Logs {
         try {
             const schema = await this.getSchema();
             const { database, services } = this.context;
+            const globalService = new services.ItemsService("global", {
+                database,
+                schema,
+            });
             // Check for passed recipient, fallback to global settings
             let recipients = [];
             if (recipientOverride) {
                 recipients = [recipientOverride];
             }
             else {
-                const globalSettings = await database
-                    .select("notice_recipient", "developer_notice_recipient")
-                    .from("global")
-                    .first();
-                recipients = [globalSettings?.notice_recipient, globalSettings?.developer_notice_recipient].filter(Boolean);
+                const globalSettings = await globalService.readSingleton({
+                    fields: [
+                        "notice_recipient.directus_users_id.id",
+                        "developer_notice_recipient.directus_users_id.id",
+                    ],
+                });
+                recipients = Array.from(new Set([
+                    ...extractRecipientIds(globalSettings?.notice_recipient),
+                    ...extractRecipientIds(globalSettings?.developer_notice_recipient),
+                ]));
             }
             if (recipients.length === 0) {
                 this.printLogs(this.extension, "No recipients defined (override or global settings)");
