@@ -117,18 +117,10 @@ export class Logs {
 				recipients = [recipientOverride];
 			} else {
 				const globalSettings = await globalService.readSingleton({
-					fields: [
-						"notice_recipient.directus_users_id.id",
-						"developer_notice_recipient.directus_users_id.id",
-					],
+					fields: ["error_notice_recipient.directus_users_id.id"],
 				});
 
-				recipients = Array.from(
-					new Set([
-						...extractRecipientIds(globalSettings?.notice_recipient),
-						...extractRecipientIds(globalSettings?.developer_notice_recipient),
-					])
-				);
+				recipients = extractRecipientIds(globalSettings?.error_notice_recipient);
 			}
 
 			if (recipients.length === 0) {
