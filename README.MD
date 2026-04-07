@@ -20,12 +20,11 @@ You need to create a collection named `logs` with the following fields:
 
 Add the following field to the `global` collection:
 
-| Field Name                   | Type                            | Description                               |
-| ---------------------------- | ------------------------------- | ----------------------------------------- |
-| `notice_recipient`           | m2m → directus_users (junction) | Primary recipients for error notifications |
-| `developer_notice_recipient` | m2m → directus_users (junction) | Additional developer recipients            |
+| Field Name               | Type                            | Description                        |
+| ------------------------ | ------------------------------- | ---------------------------------- |
+| `error_notice_recipient` | m2m → directus_users (junction) | Recipients for error notifications |
 
-All linked users from these fields will receive internal notifications when errors occur.
+All linked users from this field will receive internal notifications when errors occur.
 
 ## 🚀 Features
 
