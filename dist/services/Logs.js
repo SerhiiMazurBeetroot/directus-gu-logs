@@ -1,0 +1,96 @@
+import { SlackNotifier } from "../services/SlackNotifier";
+import { DirectusNotifier } from "./DirectusNotifier";
+export class Logs {
+    constructor(context, extension, collectionName = "logs") {
+        this.context = context;
+        this.extension = extension;
+        this.collectionName = collectionName;
+        this.slack = new SlackNotifier(context, extension);
+        this.directus = new DirectusNotifier(context, extension);
+    }
+    async getSchema() {
+        return this.context.getSchema();
+    }
+    async getProjectMeta() {
+        const settings = await this.context.database.select("project_name").from("directus_settings").first();
+        return {
+            projectName: settings?.project_name ?? "Unknown Project",
+            backendUrl: process.env.BACKEND_URL ?? this.context.env?.PUBLIC_URL ?? "Unknown URL",
+            environment: process.env.BRANCH ?? "dev",
+        };
+    }
+    async createOne(data) {
+        const schema = await this.getSchema();
+        const itemsService = new this.context.services.ItemsService(this.collectionName, {
+            database: this.context.database,
+            schema,
+        });
+        return await itemsService.createOne(data);
+    }
+    /**
+     * Persists an error entry to the logs collection, optionally notifying via Slack.
+     */
+    async printLogs(functionName, error, notifySlack = true) {
+        const data = {
+            collection: this.collectionName,
+            date_created: new Date().toISOString(),
+            extension: this.extension,
+            function_name: functionName,
+            error,
+        };
+        try {
+            await this.createOne(data);
+            this.context.logger.info({ msg: `🚀 [${this.extension}] ${functionName}:`, error });
+        }
+        catch (err) {
+            this.context.logger.error({ msg: "❌ Failed to save log entry", error: err });
+            return;
+        }
+        try {
+            if (notifySlack) {
+                const meta = await this.getProjectMeta();
+                await this.slack.notify(`*Function:* ${functionName}\n*Error:* ${error}`, "Extension Error", meta);
+            }
+        }
+        catch (err) {
+            this.context.logger.error({ msg: "Slack failed", err });
+        }
+    }
+    async createActivity(action, collection, id) {
+        try {
+            const schema = await this.getSchema();
+            const { services, database } = this.context;
+            const accountability = services.accountability;
+            const activityService = new services.ActivityService({
+                schema,
+                accountability,
+                knex: database,
+            });
+            await activityService.createOne({
+                action,
+                user: accountability?.user ?? null,
+                collection,
+                ip: accountability?.ip ?? null,
+                user_agent: accountability?.userAgent ?? null,
+                origin: accountability?.origin ?? null,
+                item: id,
+            });
+        }
+        catch (error) {
+            this.context.logger.error({ msg: "❌ Failed to create activity log", error });
+        }
+    }
+    async createNotification(message, customSubject = null, recipientOverride = null, collection = null, item = null) {
+        const meta = await this.getProjectMeta();
+        await this.directus.notify(message, meta, {
+            subject: customSubject,
+            recipientOverride,
+            collection,
+            item,
+        });
+    }
+    async createSlackNotification(message, customSubject = null) {
+        const meta = await this.getProjectMeta();
+        await this.slack.notify(message, customSubject, meta);
+    }
+}
