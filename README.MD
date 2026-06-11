@@ -24,6 +24,7 @@ Add the following field to the `global` singleton collection:
 | ------------------------ | ------------------------------- | -------------------------------------------- |
 | `error_notice_recipient` | m2m → directus_users (junction) | Recipients for error notifications           |
 | `slack_webhook_url`      | input                           | Incoming webhook URL for Slack notifications |
+| `slack_notifications`    | boolen                          | Toggle Slack notifications                   |
 
 All linked users will receive internal Directus notifications when errors occur (unless a recipient override is passed).
 
@@ -80,10 +81,10 @@ import { Logs } from "@serhii.mazur/directus-gu-logs";
 const logs = new Logs(context, "my-extension");
 
 // Persist error log to DB + notify Slack
-await logs.printLogs("myFunction", "Something went wrong");
+await logs.logError("myFunction", "Something went wrong", true);
 
 // Persist error log without Slack notification
-await logs.printLogs("myFunction", "Something went wrong", false);
+await logs.logError("myFunction", "Something went wrong");
 
 // Create a Directus activity record
 await logs.createActivity("create", "collection_name", "item_id");
@@ -101,7 +102,7 @@ await logs.createNotification("An error occurred", "Custom Subject", "user_id");
 await logs.createNotification("An error occurred", "Custom Subject", null, "collection_name", "item_id");
 
 // Send Slack notification directly
-await logs.createSlackNotification("Deploy failed on main", "CI Alert");
+await logs.notifySlack("Deploy failed on main", "CI Alert");
 ```
 
 ### Advanced (direct class usage)
@@ -150,7 +151,7 @@ constructor(
 
 ## 🧠 How It Works
 
-### `printLogs(functionName, error, notifySlack?)`
+### `logError(functionName, error, notifySlack?)`
 
 1. Writes a structured entry to the logs collection
 2. If `notifySlack` is `true` (default), sends a Slack Block Kit message with extension name, function, and error
@@ -174,7 +175,7 @@ Then sends one in-app notification per recipient. Each notification includes:
 - The message body
 - Environment label, backend URL, and UTC timestamp
 
-### `createSlackNotification(message, subject?)`
+### `notifySlack(message, subject?)`
 
 Sends a formatted Slack Block Kit message via `slack_webhook_url`. Silently skips if the var is not set. The payload includes project name, environment, extension name, backend URL, and the message body.
 

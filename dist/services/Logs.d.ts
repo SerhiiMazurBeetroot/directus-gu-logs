@@ -14,8 +14,10 @@ export declare class Logs {
     /**
      * Persists an error entry to the logs collection, optionally notifying via Slack.
      */
+    logError(functionName: string, error: string, notifySlack?: boolean): Promise<void>;
+    /** @deprecated Use logError() instead */
     printLogs(functionName: string, error: string, notifySlack?: boolean): Promise<void>;
     createActivity(action: string, collection: string, id: PrimaryKey): Promise<void>;
-    createNotification(message: string, customSubject?: string | null, recipientOverride?: string | null, collection?: string | null, item?: string | null): Promise<void>;
-    createSlackNotification(message: string, customSubject?: string | null): Promise<void>;
+    createNotification(message: string, customSubject?: string | null, recipientOverride?: string | null, collection?: string | null, item?: string | null, notifySlack?: boolean): Promise<void>;
+    notifySlack(message: string, customSubject?: string | null): Promise<void>;
 }

@@ -17,6 +17,15 @@ export class Logs {
             projectName: settings?.project_name ?? "Unknown Project",
             backendUrl: process.env.BACKEND_URL ?? this.context.env?.PUBLIC_URL ?? "Unknown URL",
             environment: process.env.BRANCH ?? "dev",
+            timestamp: new Intl.DateTimeFormat("en-US", {
+                month: "2-digit",
+                day: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+                timeZone: "UTC",
+            }).format(new Date()),
         };
     }
     async createOne(data) {
@@ -30,7 +39,7 @@ export class Logs {
     /**
      * Persists an error entry to the logs collection, optionally notifying via Slack.
      */
-    async printLogs(functionName, error, notifySlack = true) {
+    async logError(functionName, error, notifySlack = false) {
         const data = {
             collection: this.collectionName,
             date_created: new Date().toISOString(),
@@ -40,7 +49,7 @@ export class Logs {
         };
         try {
             await this.createOne(data);
-            this.context.logger.info({ msg: `🚀 [${this.extension}] ${functionName}:`, error });
+            this.context.logger.error({ msg: `🚀 [${this.extension}] ${functionName}:`, error });
         }
         catch (err) {
             this.context.logger.error({ msg: "❌ Failed to save log entry", error: err });
@@ -49,12 +58,16 @@ export class Logs {
         try {
             if (notifySlack) {
                 const meta = await this.getProjectMeta();
-                await this.slack.notify(`*Function:* ${functionName}\n*Error:* ${error}`, "Extension Error", meta);
+                await this.slack.notify(`*Function:* ${functionName}\n*Error:* ${error}`, meta, "Extension Error");
             }
         }
         catch (err) {
-            this.context.logger.error({ msg: "Slack failed", err });
+            this.context.logger.error({ msg: "Slack failed", error: err });
         }
+    }
+    /** @deprecated Use logError() instead */
+    async printLogs(functionName, error, notifySlack = false) {
+        return this.logError(functionName, error, notifySlack);
     }
     async createActivity(action, collection, id) {
         try {
@@ -76,11 +89,11 @@ export class Logs {
                 item: id,
             });
         }
-        catch (error) {
-            this.context.logger.error({ msg: "❌ Failed to create activity log", error });
+        catch (err) {
+            this.context.logger.error({ msg: "❌ Failed to create activity log", error: err });
         }
     }
-    async createNotification(message, customSubject = null, recipientOverride = null, collection = null, item = null) {
+    async createNotification(message, customSubject = null, recipientOverride = null, collection = null, item = null, notifySlack = true) {
         const meta = await this.getProjectMeta();
         await this.directus.notify(message, meta, {
             subject: customSubject,
@@ -88,9 +101,18 @@ export class Logs {
             collection,
             item,
         });
+        try {
+            if (notifySlack) {
+                const meta = await this.getProjectMeta();
+                await this.slack.notify(`*Error:* ${message}`, meta, customSubject);
+            }
+        }
+        catch (err) {
+            this.context.logger.error({ msg: "Slack failed", error: err });
+        }
     }
-    async createSlackNotification(message, customSubject = null) {
+    async notifySlack(message, customSubject = null) {
         const meta = await this.getProjectMeta();
-        await this.slack.notify(message, customSubject, meta);
+        await this.slack.notify(message, meta, customSubject);
     }
 }

@@ -16,6 +16,7 @@ export interface ProjectMeta {
     projectName: string;
     backendUrl: string;
     environment: string;
+    timestamp: string;
 }
 export interface SlackBlock {
     type: string;
