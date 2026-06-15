@@ -20,6 +20,7 @@ export class SlackNotifier {
     }
     buildBlocks(title, envIcon, message, meta) {
         return [
+            { type: "divider" },
             {
                 type: "header",
                 text: { type: "plain_text", text: `${envIcon} ${title}: ${this.extension}` },
@@ -33,8 +34,8 @@ export class SlackNotifier {
                     { type: "mrkdwn", text: `*Backend*\n${meta.backendUrl}` },
                 ],
             },
-            { type: "divider" },
             { type: "section", text: { type: "mrkdwn", text: message } },
+            { type: "divider" },
         ];
     }
     async send(payload) {
@@ -70,6 +71,10 @@ export class SlackNotifier {
             text: title,
             blocks: this.buildBlocks(title, envIcon, message, meta),
         });
+    }
+    async isEnabled() {
+        const config = await this.getConfig();
+        return Boolean(config?.slack_notifications && config?.slack_webhook_url);
     }
     async getConfig() {
         const now = Date.now();

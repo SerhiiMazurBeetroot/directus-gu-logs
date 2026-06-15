@@ -119,6 +119,27 @@ export class Logs {
 		item: string | null = null,
 		notifySlack = true,
 	): Promise<void> {
+		const slackEnabled = await this.slack.isEnabled();
+
+		if (slackEnabled && notifySlack) {
+			try {
+				await this.notifySlack(`*Error:* ${message}`, customSubject);
+				return;
+			} catch (err) {
+				this.context.logger.error({ msg: "❌ Slack notification failed", error: err });
+			}
+		}
+
+		await this.notifyEmail(message, customSubject, recipientOverride, collection, item);
+	}
+
+	async notifyEmail(
+		message: string,
+		customSubject: string | null = null,
+		recipientOverride: string | null = null,
+		collection: string | null = null,
+		item: string | null = null,
+	): Promise<void> {
 		const meta = await this.getProjectMeta();
 
 		await this.directus.notify(message, meta, {
@@ -127,15 +148,6 @@ export class Logs {
 			collection,
 			item,
 		});
-
-		try {
-			if (notifySlack) {
-				const meta = await this.getProjectMeta();
-				await this.slack.notify(`*Error:* ${message}`, meta, customSubject);
-			}
-		} catch (err) {
-			this.context.logger.error({ msg: "Slack failed", error: err });
-		}
 	}
 
 	async notifySlack(message: string, customSubject: string | null = null): Promise<void> {

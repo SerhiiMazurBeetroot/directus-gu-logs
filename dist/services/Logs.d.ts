@@ -19,5 +19,6 @@ export declare class Logs {
     printLogs(functionName: string, error: string, notifySlack?: boolean): Promise<void>;
     createActivity(action: string, collection: string, id: PrimaryKey): Promise<void>;
     createNotification(message: string, customSubject?: string | null, recipientOverride?: string | null, collection?: string | null, item?: string | null, notifySlack?: boolean): Promise<void>;
+    notifyEmail(message: string, customSubject?: string | null, recipientOverride?: string | null, collection?: string | null, item?: string | null): Promise<void>;
     notifySlack(message: string, customSubject?: string | null): Promise<void>;
 }

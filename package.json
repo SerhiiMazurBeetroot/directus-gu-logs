@@ -1,6 +1,6 @@
 {
 	"name": "@serhii.mazur/directus-gu-logs",
-	"version": "1.0.10",
+	"version": "1.0.11",
 	"description": "Reusable logging utility for Directus extensions — persists error entries, tracks activity, and sends notifications via Slack and Directus inbox.",
 	"type": "module",
 	"main": "./dist/index.js",

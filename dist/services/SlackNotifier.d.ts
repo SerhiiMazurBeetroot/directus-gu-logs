@@ -10,6 +10,7 @@ export declare class SlackNotifier {
     private buildBlocks;
     send(payload: SlackPayload): Promise<void>;
     notify(message: string, meta: ProjectMeta, subject?: string | null): Promise<void>;
+    isEnabled(): Promise<boolean>;
     private getConfig;
     clearConfigCache(): void;
 }
